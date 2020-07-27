@@ -2,6 +2,7 @@
 
 namespace src;
 
+use src\app\Application;
 use src\Process;
 use src\ProcessPool;
 use src\SignalHandler;
@@ -23,35 +24,39 @@ class Daemon
         $forkProcessPid = $this->forkProcess->getPid();
 
         if ($forkProcessPid == -1) {
-            die('Не удалось породить дочерний процесс');
+            exit('Не удалось породить дочерний процесс');
+
         } else if ($forkProcessPid) {
             //тут убит родительский процесс
             exit(PHP_EOL . 'parent die');
+
         } else {
 
+            //назначить текущий процесс главным в сессии
             posix_setsid();
+
             //текущий процесс - является дочерним в данном блоке, родительский убит
             $childrenProcess = new Process(posix_getpid());
 
             //обработчик сигналов linux
             $signalHandler = new SignalHandler();
 
-            // пул процессов для создания многопроцессорного демона
+            // пул процессов для создания многопроцессного демона
             $processPool = new ProcessPool();
 
-            $a = 0;
+            //инициализация пользовательского приложения
+            $app = new Application();
+
+            // основной цикл (daemon)
             while ($this->enable) {
 
                 //логика приложения
-                sleep(1);
-                echo date("H:i:s") . PHP_EOL;
+                $app->handler();
 
-                //условия выхода из Daemon
-                if ($a == 2) {
-                    $childrenProcess->kill($childrenProcess->getPid(), SIGHUP);
+                //условия выхода из daemon
+                if ($app->exitCondition($childrenProcess, 0)) {
                     $this->enable = false;
                 }
-                $a++;
             }
         }
     }
