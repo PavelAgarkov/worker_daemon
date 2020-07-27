@@ -20,19 +20,18 @@ class Application
     }
 
     /**
-     * @param Process $childrenProcess
      * @param int $number
      * @return bool
      * Метод реалзующий логику выхода из daemon режима
      */
-    public function exitCondition(Process $childrenProcess, int $number): bool
+    public function exitCondition(int $number): bool
     {
-        while ($number != 5) {
+        while ($number < 3) {
             $number++;
             if ($number == 2) {
-                $childrenProcess->kill($childrenProcess->getPid(), SIGHUP);
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }

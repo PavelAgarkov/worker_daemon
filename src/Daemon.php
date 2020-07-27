@@ -39,7 +39,7 @@ class Daemon
             $childrenProcess = new Process(posix_getpid());
 
             //обработчик сигналов linux
-            $signalHandler = new SignalHandler();
+            $signalHandler = new SignalHandler($this);
 
             // пул процессов для создания многопроцессного демона
             $processPool = new ProcessPool();
@@ -47,15 +47,32 @@ class Daemon
             //инициализация пользовательского приложения
             $app = new Application();
 
+            $a = 0;
             // основной цикл (daemon)
             while ($this->enable) {
 
-                //логика приложения
-                $app->handler();
+                //цикл приложения
+                while (true) {
+                    echo 'end' . PHP_EOL;
+                    //логика приложения
+                    $app->handler();
 
-                //условия выхода из daemon
-                if ($app->exitCondition($childrenProcess, 0)) {
-                    $this->enable = false;
+                    //условия выхода из цикла приложения
+                    if ($app->exitCondition(0)) {
+                        echo 111;
+                        $a++;
+
+                        if ($a > 5) {
+                            $this->enable = false;
+                        }
+
+                        break;
+                    }
+                }
+
+                //условие завершения демона
+                if (!$this->enable) {
+                    $childrenProcess->kill($childrenProcess->getPid(), SIGHUP);
                 }
             }
         }
