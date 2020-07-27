@@ -5,7 +5,7 @@ declare(strict_types=1);
 //echo posix_getpgrp();
 // print_r(posix_getgrgid(posix_getpgrp()));
 
-$ps = shell_exec('ps -e');
+$ps = shell_exec('ps -aux');
 //echo $ps;
 $processes_array = explode("\n", $ps);
 unset($processes_array[0]);

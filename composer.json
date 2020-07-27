@@ -1,0 +1,12 @@
+{
+  "require": {
+    "ext-pcntl": "*",
+    "ext-posix": "*"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "src\\": "src/"
+    }
+  }
+}
